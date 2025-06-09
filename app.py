@@ -22,10 +22,13 @@ def search_datasets(
     min_downloads: int = 0
 ) -> str:
     """
-    Search for datasets based on a text query.
+    Search for datasets using semantic/similarity search based on a text query.
+    
+    This uses AI-powered semantic search to find datasets whose descriptions 
+    are semantically similar to your query, not just keyword matching.
     
     Args:
-        query: Search query text
+        query: Search query text (natural language description of what you're looking for)
         k: Number of results to return (1-100)
         sort_by: Sort method for results (similarity, likes, downloads, trending)
         min_likes: Minimum likes filter
@@ -118,10 +121,13 @@ def search_models(
     max_param_count: Optional[int] = None
 ) -> str:
     """
-    Search for models based on a text query with optional parameter count filtering.
+    Search for models using semantic/similarity search based on a text query with optional parameter count filtering.
+    
+    This uses AI-powered semantic search to find models whose descriptions
+    are semantically similar to your query, not just keyword matching.
     
     Args:
-        query: Search query text
+        query: Search query text (natural language description of what you're looking for)
         k: Number of results to return (1-100)
         sort_by: Sort method for results (similarity, likes, downloads, trending)
         min_likes: Minimum likes filter
