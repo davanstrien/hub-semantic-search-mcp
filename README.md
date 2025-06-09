@@ -26,6 +26,7 @@ An MCP (Model Context Protocol) server that provides semantic search capabilitie
 - `find_similar_models`: Find models similar to a specified one
 - `get_trending_models`: Get currently trending models with parameter filtering
 - `get_model_info`: Get detailed metadata for a specific model
+- `get_model_safetensors_metadata`: Get model architecture details and parameter count from safetensors
 - `download_model_card`: Download README card for a model
 
 ## Installation
@@ -115,6 +116,7 @@ Once configured, you can use the tools in Claude Desktop:
 ### Get Detailed Metadata
 > "Get detailed information about the 'stanford-nlp/imdb' dataset"
 > "Show me technical details and configuration for 'microsoft/DialoGPT-medium'"
+> "What's the parameter count and architecture of 'microsoft/DialoGPT-medium'?"
 
 ### Download Documentation
 > "Download the model card for 'microsoft/DialoGPT-medium'"

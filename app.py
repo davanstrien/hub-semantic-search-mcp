@@ -12,6 +12,7 @@ MCP Server for Hugging Face Dataset and Model Search API
 import json
 import logging
 import os
+import struct
 from typing import Any, Dict, Optional
 
 import httpx
@@ -291,6 +292,96 @@ async def get_trending_datasets(
     data = response.json()
     
     return format_dataset_results(data)
+
+@mcp.tool()
+async def get_model_safetensors_metadata(model_id: str, filename: str = "model.safetensors") -> str:
+    """
+    Get safetensors metadata for a HuggingFace model to understand model architecture and parameter count.
+    
+    This tool parses the safetensors file header to extract detailed information about:
+    - Model parameter count and size breakdown by layer
+    - Tensor shapes and data types (float16, bfloat16, etc.)
+    - Layer names and architecture structure
+    - Memory requirements and model size
+    
+    Useful for understanding model complexity, memory needs, and architectural details.
+    
+    Args:
+        model_id: The model ID (e.g., 'username/model-name')
+        filename: The safetensors filename (default: 'model.safetensors')
+    
+    Returns:
+        JSON string with safetensors metadata including tensor shapes, parameter counts, and architecture info
+    """
+    client = await get_client()
+    
+    # Construct URL for safetensors metadata
+    url = f"https://huggingface.co/{model_id}/raw/main/{filename}"
+    
+    try:
+        # Make a HEAD request first to check if file exists
+        head_response = await client.head(url)
+        head_response.raise_for_status()
+        
+        # Get just the first 8 bytes to read the header length
+        headers = {"Range": "bytes=0-7"}
+        response = await client.get(url, headers=headers)
+        response.raise_for_status()
+        
+        # Parse header length (first 8 bytes as little-endian uint64)
+        header_length = struct.unpack('<Q', response.content)[0]
+        
+        # Now get the actual header
+        headers = {"Range": f"bytes=8-{8 + header_length - 1}"}
+        response = await client.get(url, headers=headers)
+        response.raise_for_status()
+        
+        # Parse the JSON header
+        header_data = json.loads(response.content.decode('utf-8'))
+        
+        # Format for better readability
+        return json.dumps(header_data, indent=2)
+        
+    except Exception as e:
+        # Try alternative filename patterns if the default fails
+        alternative_files = [
+            "model.safetensors.index.json",
+            "pytorch_model.bin", 
+            "model-00001-of-*.safetensors"
+        ]
+        
+        if filename == "model.safetensors":
+            # Try to get the safetensors index file which lists all the sharded files
+            try:
+                index_url = f"https://huggingface.co/{model_id}/raw/main/model.safetensors.index.json"
+                response = await client.get(index_url)
+                response.raise_for_status()
+                index_data = response.json()
+                
+                # Return information about the model sharding
+                result = {
+                    "error": f"Single safetensors file not found. Model appears to be sharded.",
+                    "index_metadata": index_data,
+                    "available_files": list(set(index_data.get("weight_map", {}).values())),
+                    "suggestion": "Try specifying a specific shard filename like 'model-00001-of-00002.safetensors'"
+                }
+                return json.dumps(result, indent=2)
+                
+            except:
+                pass
+        
+        # If all else fails, return the error with suggestions
+        error_result = {
+            "error": f"Could not access safetensors metadata: {str(e)}",
+            "requested_file": filename,
+            "suggestions": [
+                "Check if the model uses safetensors format",
+                "Try 'model.safetensors.index.json' for sharded models", 
+                "Try specific shard files like 'model-00001-of-00002.safetensors'",
+                "Some models may only have pytorch_model.bin files"
+            ]
+        }
+        return json.dumps(error_result, indent=2)
 
 @mcp.tool()
 async def download_model_card(model_id: str) -> str:
