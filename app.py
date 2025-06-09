@@ -4,14 +4,19 @@ MCP Server for Hugging Face Dataset and Model Search API using Gradio
 """
 
 import os
+import logging
 from typing import Optional
 
 import gradio as gr
 import httpx
 
-# Initialize HTTP client
-client = httpx.Client(timeout=30.0)
-base_url = os.getenv("HF_SEARCH_API_URL", "http://localhost:8000")
+# Set up logging
+logging.basicConfig(level=logging.INFO)
+logger = logging.getLogger(__name__)
+
+# Initialize HTTP client with longer timeout for MCP usage
+client = httpx.Client(timeout=60.0)  # Increased timeout
+base_url = os.getenv("HF_SEARCH_API_URL", "https://davanstrien-huggingface-datasets-search-v2.hf.space")
 
 
 def search_datasets(
@@ -37,17 +42,32 @@ def search_datasets(
     Returns:
         Formatted search results with dataset IDs, summaries, and metadata
     """
-    params = {
-        "query": query,
-        "k": k,
-        "sort_by": sort_by,
-        "min_likes": min_likes,
-        "min_downloads": min_downloads
-    }
-    
-    response = client.get(f"{base_url}/search/datasets", params=params)
-    response.raise_for_status()
-    data = response.json()
+    try:
+        logger.info(f"Searching datasets: query='{query}', k={k}, sort_by='{sort_by}'")
+        
+        params = {
+            "query": query,
+            "k": k,
+            "sort_by": sort_by,
+            "min_likes": min_likes,
+            "min_downloads": min_downloads
+        }
+        
+        logger.info(f"Making request to: {base_url}/search/datasets")
+        response = client.get(f"{base_url}/search/datasets", params=params)
+        response.raise_for_status()
+        data = response.json()
+        
+        logger.info(f"Successfully retrieved {len(data.get('results', []))} results")
+    except httpx.TimeoutException:
+        logger.error(f"Request timed out for query: {query}")
+        return "Request timed out. The search service may be slow or unavailable."
+    except httpx.HTTPStatusError as e:
+        logger.error(f"HTTP error {e.response.status_code}: {e.response.text}")
+        return f"Search failed with HTTP error {e.response.status_code}: {e.response.text}"
+    except Exception as e:
+        logger.error(f"Unexpected error: {str(e)}")
+        return f"Search failed: {str(e)}"
     
     results = data.get("results", [])
     if not results:
@@ -383,6 +403,7 @@ def download_dataset_card(dataset_id: str) -> str:
 with gr.Blocks(title="HuggingFace Search MCP Server") as demo:
     gr.Markdown("# HuggingFace Search MCP Server")
     gr.Markdown("This server provides semantic search capabilities for HuggingFace models and datasets.")
+    gr.Markdown(f"**Backend API:** {base_url}")
     
     with gr.Tab("Search Datasets"):
         gr.Interface(
