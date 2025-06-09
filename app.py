@@ -518,4 +518,23 @@ with gr.Blocks(title="HuggingFace Search MCP Server") as demo:
 
 if __name__ == "__main__":
     # Launch with MCP server enabled
-    demo.launch(mcp_server=True)
+    # Try environment variable approach as workaround for initialization race condition
+    import os
+    os.environ["GRADIO_MCP_SERVER"] = "true"
+    
+    try:
+        # First try with environment variable only
+        demo.launch(
+            server_name="0.0.0.0", 
+            server_port=7860,
+            show_error=True
+        )
+    except Exception as e:
+        logger.error(f"Environment variable approach failed: {e}")
+        # Fallback to parameter approach
+        demo.launch(
+            mcp_server=True,
+            server_name="0.0.0.0", 
+            server_port=7860,
+            show_error=True
+        )
