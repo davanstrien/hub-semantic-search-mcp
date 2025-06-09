@@ -9,6 +9,7 @@ An MCP (Model Context Protocol) server that provides semantic search capabilitie
 - **Model Search**: Find models with optional parameter count filtering
 - **Similarity Search**: Find similar models/datasets to a given one
 - **Trending Content**: Get currently trending models and datasets
+- **Detailed Metadata**: Access comprehensive technical information via HuggingFace API
 - **Model/Dataset Cards**: Download README cards for detailed information
 
 ## Tools Available
@@ -17,12 +18,14 @@ An MCP (Model Context Protocol) server that provides semantic search capabilitie
 - `search_datasets`: Search datasets using natural language queries
 - `find_similar_datasets`: Find datasets similar to a specified one
 - `get_trending_datasets`: Get currently trending datasets
+- `get_dataset_info`: Get detailed metadata for a specific dataset
 - `download_dataset_card`: Download README card for a dataset
 
 ### Model Tools  
 - `search_models`: Search models using natural language queries with parameter filtering
 - `find_similar_models`: Find models similar to a specified one
 - `get_trending_models`: Get currently trending models with parameter filtering
+- `get_model_info`: Get detailed metadata for a specific model
 - `download_model_card`: Download README card for a model
 
 ## Installation
@@ -108,6 +111,10 @@ Once configured, you can use the tools in Claude Desktop:
 
 ### Get Trending Content
 > "Show me the top 10 trending AI models this week"
+
+### Get Detailed Metadata
+> "Get detailed information about the 'stanford-nlp/imdb' dataset"
+> "Show me technical details and configuration for 'microsoft/DialoGPT-medium'"
 
 ### Download Documentation
 > "Download the model card for 'microsoft/DialoGPT-medium'"

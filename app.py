@@ -9,6 +9,7 @@
 MCP Server for Hugging Face Dataset and Model Search API
 """
 
+import json
 import logging
 import os
 from typing import Any, Dict, Optional
@@ -307,6 +308,53 @@ async def download_model_card(model_id: str) -> str:
     response = await client.get(url)
     response.raise_for_status()
     return response.text
+
+@mcp.tool()
+async def get_dataset_info(dataset_id: str) -> str:
+    """
+    Get detailed metadata information for a HuggingFace dataset.
+    
+    Returns structured information including tags, license, downloads, 
+    likes, dataset structure, configuration, and other metadata.
+    
+    Args:
+        dataset_id: The dataset ID (e.g., 'username/dataset-name')
+    
+    Returns:
+        JSON string with comprehensive dataset metadata
+    """
+    client = await get_client()
+    url = f"https://huggingface.co/api/datasets/{dataset_id}"
+    response = await client.get(url)
+    response.raise_for_status()
+    
+    # Format the JSON response for better readability
+    data = response.json()
+    return json.dumps(data, indent=2)
+
+@mcp.tool()
+async def get_model_info(model_id: str) -> str:
+    """
+    Get detailed metadata information for a HuggingFace model.
+    
+    Returns structured information including tags, license, downloads,
+    likes, model configuration, pipeline info, and other metadata.
+    
+    Args:
+        model_id: The model ID (e.g., 'username/model-name')
+    
+    Returns:
+        JSON string with comprehensive model metadata
+    """
+    client = await get_client()
+    url = f"https://huggingface.co/api/models/{model_id}"
+    response = await client.get(url)
+    response.raise_for_status()
+    
+    # Format the JSON response for better readability
+    import json
+    data = response.json()
+    return json.dumps(data, indent=2)
 
 @mcp.tool()
 async def download_dataset_card(dataset_id: str) -> str:
