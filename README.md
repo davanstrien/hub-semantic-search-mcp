@@ -32,10 +32,7 @@ An MCP (Model Context Protocol) server that provides semantic search capabilitie
 - Claude Desktop or another MCP-compatible client
 
 ### Quick Start
-```bash
-# Install directly from GitHub with UV
-uv tool install git+https://github.com/davanstrien/hub-semantic-search-mcp.git
-```
+No installation needed! UV will automatically fetch and run the server.
 
 ## Configuration
 
@@ -50,7 +47,13 @@ Add the following to your Claude Desktop configuration file:
 {
   "mcpServers": {
     "huggingface-hub-search": {
-      "command": "hub-semantic-search-mcp"
+      "command": "uvx",
+      "args": [
+        "git+https://github.com/davanstrien/hub-semantic-search-mcp.git"
+      ],
+      "env": {
+        "HF_SEARCH_API_URL": "https://davanstrien-huggingface-datasets-search-v2.hf.space"
+      }
     }
   }
 }
@@ -81,7 +84,10 @@ Then configure Claude Desktop to use the local version:
         "run",
         "python",
         "app.py"
-      ]
+      ],
+      "env": {
+        "HF_SEARCH_API_URL": "https://davanstrien-huggingface-datasets-search-v2.hf.space"
+      }
     }
   }
 }
@@ -128,6 +134,10 @@ python app.py
 
 ### Testing with MCP Inspector
 ```bash
+# Test the GitHub version
+npx @modelcontextprotocol/inspector uvx git+https://github.com/davanstrien/hub-semantic-search-mcp.git
+
+# Or test locally
 npx @modelcontextprotocol/inspector uv run python app.py
 ```
 
