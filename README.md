@@ -1,5 +1,7 @@
 # Hugging Face Hub Semantic Search MCP Server
 
+> **⚠️ Note**: This is an **unofficial** MCP server inspired by Hugging Face's official MCP server. It may be deprecated at any time if official functionality supersedes it. For the official server, see [hf.co/mcp](https://hf.co/mcp).
+
 An MCP (Model Context Protocol) server that provides semantic search capabilities for Hugging Face models and datasets. This server enables Claude and other MCP-compatible clients to search, discover, and explore the Hugging Face ecosystem using natural language queries.
 
 ## Features
